@@ -5,18 +5,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from database import SessionLocal
 from models import Users
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 
+from utils.hash import ALGORITHM, SECRET_KEY, HashPassword, VerifyPassword
+
 router = APIRouter(prefix='/auth', tags=['auth'])
 
-SECRET_KEY = '57c0a5eff8dbd9dac9300be80102cb32c0dc19bdd507491a866c3be645882ed7'
-ALGORITHM = 'HS256'
 
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 class CreateUserRequest(BaseModel):
@@ -47,7 +45,7 @@ def auth_user(username: str, password: str, db):
 
     if not user:
         return False
-    if not bcrypt_context.verify(password, user.hashed_password):
+    if not VerifyPassword(password, user.hashed_password):
         return False
     return user
 
@@ -87,7 +85,7 @@ async def create_user(db: db_deps, create_user_request: CreateUserRequest):
         username = create_user_request.username,
         first_name = create_user_request.first_name,
         last_name = create_user_request.last_name,
-        hashed_password = bcrypt_context.hash(create_user_request.password),
+        hashed_password = HashPassword(create_user_request.password),
         role = create_user_request.role,
         is_active = True
     )
