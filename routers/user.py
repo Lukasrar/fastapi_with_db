@@ -30,6 +30,7 @@ class UserResponse(BaseModel):
     last_name: str
     is_active: bool
     role: str
+    phone_number: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -66,6 +67,22 @@ async def change_password(user: user_deps, db: db_deps, change_pass_request:Chan
     else:
         raise HTTPException(status_code=500, detail="An error has occured")
   
+
+@router.put('/change-phone-number/{phone_number}', status_code=status.HTTP_204_NO_CONTENT)
+async def change_phonenumber(user: user_deps, db: db_deps, phone_number: str):    
+
+    user_model = db.query(Users).filter(Users.id == user.get("id")).first()
+
+    if user_model is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+
+    user_model.phone_number = phone_number
+
+    db.add(user_model)
+    db.commit()
+  
+
 
 
 
