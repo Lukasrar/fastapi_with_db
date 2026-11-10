@@ -14,7 +14,6 @@ from utils.hash import ALGORITHM, SECRET_KEY, HashPassword, VerifyPassword
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
-
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 class CreateUserRequest(BaseModel):
